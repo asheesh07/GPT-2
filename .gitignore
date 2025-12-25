@@ -1,0 +1,52 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# ========================
+# Data (never commit)
+# ========================
+data/
+datasets/
+raw_data/
+processed_data/
+
+# Allow README inside data if needed
+!data/README.md
+
+# ========================
+# Model artifacts
+# ========================
+checkpoints/
+checkpoint_*.pt
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+
+# ========================
+# Embeddings & indexes
+# ========================
+*.faiss
+*.index
+*.npy
+
+# ========================
+# Logs & cache
+# ========================
+logs/
+.cache/
+
+# ========================
+# OS / IDE
+# ========================
+.DS_Store
+.vscode/
+.idea/
