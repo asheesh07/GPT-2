@@ -1,42 +1,39 @@
 # GPT-2 From Scratch — Architecture, Training, and Failure Modes
 
-A from-scratch PyTorch implementation of GPT-2, based on
-Radford et al., “Language Models are Unsupervised Multitask Learners”.
+A from-scratch PyTorch implementation of **GPT-2**, based on  
+*Radford et al., “Language Models are Unsupervised Multitask Learners”*.
 
-This project was built to understand transformer internals and training failure modes under real compute constraints, not to chase fluent text generation or benchmark results.
+This project was built to **understand transformer internals and training failure modes under real compute constraints**, not to chase fluent text generation or benchmark results.
 
-Why This Project Exists
+---
 
-Most modern LLM workflows hide the transformer core behind high-level libraries.
+## Why This Project Exists
+
+Most modern LLM workflows hide the transformer core behind high-level libraries.  
 While practical, this obscures critical behaviors such as:
 
-why loss curves can be misleading
+- why loss curves can be misleading  
+- how causal masking enables autoregression  
+- why attention heads contribute unevenly  
+- how repetition and memorization emerge during training  
 
-how causal masking enables autoregression
+I built GPT-2 **from scratch** to remove these abstractions and observe these behaviors directly.
 
-why attention heads contribute unevenly
+---
 
-how repetition and memorization emerge during training
+## Model Architecture
 
-I built GPT-2 from scratch to remove these abstractions and observe these behaviors directly.
+This implementation closely follows the GPT-2 design:
 
-Model Architecture
+- Decoder-only transformer  
+- Multi-head **causal self-attention**  
+- **Learned positional embeddings**  
+- Pre-LayerNorm residual blocks  
+- Feed-forward MLP with GELU  
+- Autoregressive next-token prediction objective  
 
-This implementation follows the GPT-2 design closely:
+### Architecture Flow
 
-Decoder-only transformer
-
-Multi-head causal self-attention
-
-Learned positional embeddings
-
-Pre-LayerNorm residual blocks
-
-Feed-forward MLP with GELU
-
-Autoregressive next-token prediction objective
-
-Architecture Flow
 Input Tokens
   → Token Embedding + Positional Embedding
   → [Transformer Block × N]
@@ -47,53 +44,62 @@ Input Tokens
   → Final LayerNorm
   → Linear projection to vocabulary logits
 
-Supported Configurations
 
-The codebase is architecturally configurable to support multiple GPT-2 scales.
+---
 
-Variant	Layers	Heads	Embedding Dim	Params
-Tiny	4	4	256	~10M
-Small	12	12	768	~117M
-Medium*	24	16	1024	~345M
-Large*	36	20	1280	~762M
+## Supported Configurations
 
-* Medium and Large variants are architecturally supported but not trained, due to compute constraints.
+The codebase is **architecturally configurable** to support multiple GPT-2 scales.
 
-Attention Experiments
+| Variant | Layers | Heads | Embedding Dim | Params |
+|------|--------|-------|---------------|--------|
+| Tiny | 4 | 4 | 256 | ~10M |
+| Small | 12 | 12 | 768 | ~117M |
+| Medium* | 24 | 16 | 1024 | ~345M |
+| Large* | 36 | 20 | 1280 | ~762M |
 
-The model supports pluggable attention modules for controlled experimentation:
+\* Medium and Large variants are **architecturally supported but not trained**, due to compute constraints.
 
-Standard multi-head causal attention
+---
 
-Linear attention variants
+## Attention Experiments
 
-Gated attention mechanisms
+The model supports **pluggable attention modules** for controlled experimentation:
 
-These were used to study:
+- Standard multi-head causal attention  
+- Linear attention variants  
+- Gated attention mechanisms  
 
-training stability
+These were used to study training stability, memory usage, and generation behavior under constrained data.
 
-memory usage
+---
 
-generation behavior under constrained data
+## Training Setup
 
-Training Setup
+- **Dataset:** ~230 MB children’s stories corpus  
+- **Tokenizer:** Byte Pair Encoding (BPE), vocab size 50,257  
+- **Model trained:** GPT-2 Tiny (256-d, 4 layers, 4 heads)  
+- **Training steps:** ~2,000  
+- **Hardware:** Single consumer GPU  
+- **Objective:** Autoregressive language modeling  
 
-Dataset: ~230 MB children’s stories corpus
+The goal was **behavioral understanding**, not convergence or state-of-the-art results.
 
-Tokenizer: Byte Pair Encoding (BPE), vocab size 50,257
+---
 
-Model trained: GPT-2 Tiny (256-d, 4 layers, 4 heads)
+## Observed Training Behavior
 
-Training steps: ~2,000
+Training surfaced **expected and instructive failure modes**.
 
-Hardware: Single consumer GPU
+### Loss–Generation Mismatch
+Training loss continued to decrease even as generation quality degraded.
 
-Objective: Autoregressive language modeling
+### Rapid Overfitting
+Large model capacity paired with limited data led to memorization within a few thousand steps.
 
-The goal was behavioral understanding, not convergence or state-of-the-art results.
+### Entropy Collapse & Repetition
+Autoregressive decoding reinforced high-probability token paths, producing loops such as:
 
-Observed Training Behavior
 
 Training surfaced expected and instructive failure modes.
 
@@ -130,56 +136,60 @@ Output (mid-training)
 They wave to each other each to wave each each to other each wave each other ...
 
 
+
 This repetition illustrates entropy collapse under limited data and compute.
 
-What This Project Demonstrates
+---
+
+## What This Project Demonstrates
 
 This project demonstrates the ability to:
 
-implement GPT-style transformers without high-level abstractions
+- implement GPT-style transformers without high-level abstractions  
+- reason about training dynamics beyond surface metrics  
+- identify and explain common LLM failure modes  
+- design modular architectures for experimentation  
+- make principled decisions under compute constraints  
 
-reason about training dynamics beyond surface metrics
+---
 
-identify and explain common LLM failure modes
+## Limitations
 
-design modular architectures for experimentation
+- Partial training (~2K steps)  
+- Small dataset by modern standards  
+- No distributed or mixed-precision training  
+- Not intended for production inference  
 
-make principled decisions under compute constraints
+These limitations are **intentional and instructive**, aligned with the project’s goals.
 
-Limitations
+---
 
-Partial training (~2K steps)
-
-Small dataset by modern standards
-
-No distributed or mixed-precision training
-
-Not intended for production inference
-
-These limitations are intentional and instructive, aligned with the project’s goals.
-
-Why This Matters
+## Why This Matters
 
 Understanding these behaviors directly informed later work on:
 
-Retrieval-Augmented Generation (RAG)
+- Retrieval-Augmented Generation (RAG)  
+- constrained decoding strategies  
+- agentic systems  
+- evaluation beyond loss curves  
 
-constrained decoding strategies
+Modern LLM systems succeed not because transformers are “magic,” but because they are **augmented with retrieval, constraints, tooling, and scale**.
 
-agentic systems
+---
 
-evaluation beyond loss curves
+## Running the Code
 
-Modern LLM systems succeed not because transformers are “magic,” but because they are augmented with retrieval, constraints, tooling, and scale.
+```bash
+pip install -r requirements.txt
+python scripts/train.py --config configs/gpt2_tiny.yaml
 
+python scripts/generate.py --prompt "Once upon a time"
+```
 Running the Code
 pip install -r requirements.txt
 python scripts/train.py --config configs/gpt2_tiny.yaml
 
 
-Generate text:
-
-python scripts/generate.py --prompt "Once upon a time"
 
 References
 
