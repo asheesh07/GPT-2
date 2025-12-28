@@ -1,6 +1,4 @@
-
-
-#GPT-2 From Scratch — Architecture, Training, and Failure Modes
+# GPT-2 From Scratch — Architecture, Training, and Failure Modes
 
 A from-scratch PyTorch implementation of GPT-2, based on
 Radford et al., “Language Models are Unsupervised Multitask Learners”.
